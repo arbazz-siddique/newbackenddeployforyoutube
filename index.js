@@ -63,7 +63,7 @@ connectDB();
 // Setup Socket.io server
 const io = new Server(server, {
     cors: {
-        origin: "http://localhost:3000",
+        origin: process.env.FrontendUrl,
         methods: ["GET", "POST"],
         credentials:true,
     },
