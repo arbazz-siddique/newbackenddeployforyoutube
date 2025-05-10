@@ -10,7 +10,11 @@ import { likedvideocontroller, getalllikedvideo, deletelikedvideo } from "../Con
 import path from "path";  // Import path module
 import fs from "fs";
 import videofile from "../Models/VideofileModel.js";
+import { fileURLToPath } from 'url';
+import { dirname, resolve } from 'path';
 const routes = express.Router();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 routes.post("/uploadvideo", upload.single("file"), uploadvideo);
 
@@ -23,15 +27,16 @@ routes.patch("/like/:id", auth, likevideocontroller);
 routes.patch("/views/:id", viewscontroller);
 
 // ✅ Download Video Route (New)
-routes.get("/download/:id", async (req, res) => {  // 🔥 Fix: Remove /videos/ prefix if necessary
+routes.get("/download/:id", async (req, res) => {
     try {
         const video = await videofile.findById(req.params.id);
         if (!video) {
             return res.status(404).json({ message: "Video not found" });
         }
 
-        const filePath = path.resolve(video.filepath);
-        console.log("File path:", filePath); // Debugging log
+        // Join the current directory with the relative filepath
+        const filePath = resolve(__dirname, "..", video.filepath); // assuming uploads is one level up
+        console.log("Resolved file path:", filePath);
 
         if (!fs.existsSync(filePath)) {
             return res.status(404).json({ message: "File not found on server" });
@@ -51,9 +56,6 @@ routes.get("/download/:id", async (req, res) => {  // 🔥 Fix: Remove /videos/ 
         res.status(500).json({ message: "Server error" });
     }
 });
-
-
-
 
 
 //  Modify Watch Later and Like Video Routes
